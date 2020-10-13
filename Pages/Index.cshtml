@@ -1,0 +1,24 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div>
+    <h1 class="display-4 text-center">PasteBin</h1>
+    <form method="post">
+        <textarea asp-for="TextHandler.Text" type="text" class="form-control rounded-0" rows=10></textarea><br>
+        <span asp-validation-for="TextHandler.Text" class="text-danger"></span>
+        <div class="input-group mb-3">
+            <input asp-for="TextHandler.Title" type="text" class="w-25 form-control" placeholder="Title">
+            <span asp-validation-for="TextHandler.Title" class="text-danger"></span>
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-primary" asp-page="View">Insert</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial"/>
+}

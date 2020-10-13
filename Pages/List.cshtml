@@ -1,0 +1,15 @@
+@page
+@model ListModel
+@{
+    ViewData["Title"] = "List Page";
+}
+
+<div>
+    <h1 class="display-4">File List</h1>
+    <div class="container border p-3">
+        @foreach (string item in Model.FileList)
+        {
+            <li>@item</li>
+        }
+    </div>
+</div>

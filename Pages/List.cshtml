@@ -5,11 +5,24 @@
 }
 
 <div>
-    <h1 class="display-4">File List</h1>
-    <div class="container border p-3">
+    <table class="table table-">
+        <thead class="thead-dark">
+            <tr>
+                <th class="display-5" style="width:70%" scope="col">Saved Files</th>
+                <th scope="col" style="width:30%"></th>
+            </tr>
+        </thead>
+        <tbody>
         @foreach (string item in Model.FileList)
         {
-            <li>@item</li>
+            <tr>
+                <td>@item</td>
+                <td>
+                    @*both the View and Delete functionalities need to be implemented*@
+                    <a asp-class-handler="ViewText" class="btn btn-primary col-auto mx-4">View</a>
+                    <button asp-page-handler="Delete" class="btn btn-danger col-auto mx-4" onclick="return confirm($"Please confirm if you want to delete {item}?")>Delete</button>
+                </td>
+            </tr>
         }
     </div>
 </div>

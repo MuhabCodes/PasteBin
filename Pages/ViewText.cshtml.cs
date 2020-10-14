@@ -8,24 +8,39 @@ using System.Linq;
 using System.Threading.Tasks;
 using PasteBin.Models;
 using Microsoft.AspNetCore.Hosting;
-using PasteBin.Models;
 
 namespace PasteBin.Pages
 {
     public class ViewTextModel : PageModel
     {
         private readonly ILogger<ViewTextModel> _logger;
+        
+        private readonly IWebHostEnvironment _env;
 
-        public TextHandler? ViewedFile { get; set; }
+        public string TextDirectory { get; set; }
 
-        public ViewTextModel(ILogger<ViewTextModel> logger)
+        public TextHandler ViewedFile { get; set; } = new();
+
+        public ViewTextModel(ILogger<ViewTextModel> logger, IWebHostEnvironment env)
         {
             _logger=logger;
+            _env = env;
+            TextDirectory = Locations.FileLocation(env);
         }
 
-        public void OnGet()
+        public IActionResult OnGet(string FileName)
         {
-
+            ViewedFile.Title = FileName;
+            if (Directory.Exists(TextDirectory))
+            {
+                string FilePath = Path.Combine(TextDirectory, FileName);
+                if (System.IO.File.Exists(FilePath))
+                {
+                    ViewedFile.Text = System.IO.File.ReadAllText(Path.Combine(TextDirectory, FileName));
+                    return Page();
+                }
+            }
+            return NotFound();
         }
     }
 }

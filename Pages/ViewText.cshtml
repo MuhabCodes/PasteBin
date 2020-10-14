@@ -3,11 +3,26 @@
 @{
     if(Model.ViewedFile != null)
     {
-        ViewData["Title"] = "View Te Page";
+        ViewData["Title"] = $"{@Model.ViewedFile.Title}";
     }
 }
 
-@if(Model.ViewedFile != null)
+@if (Model.ViewedFile != null)
 {
-    // File View functionality still needs to be added
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th class="display-5">@Model.ViewedFile.Title</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@Model.ViewedFile.Text</td>
+            </tr>
+        </tbody>
+    </table>
+    <form method="post">
+        <a asp-page="List" class="btn btn-primary text-white">Back</a>
+        <button asp-page="List" asp-page-handler="Delete" asp-route-FileName="@Model.ViewedFile.Title" class="btn btn-danger col-auto mx-4" onclick="return confirm('Are you sure you want to delete @Model.ViewedFile.Title?')">Delete</button>
+    </form>
 }

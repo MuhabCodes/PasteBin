@@ -11,26 +11,53 @@ namespace PasteBin.Pages
     public class ListModel : PageModel
     {
         private readonly ILogger<ListModel> _logger;
+
         private readonly IWebHostEnvironment _env;
         
-        public List<string> FileList { set; get; } = new List<string>();
+        public string TextDirectory { get; set; }
+
+        public List<string> FileList { get; set; } = new List<string>();
         
         public ListModel(ILogger<ListModel> logger, IWebHostEnvironment env)
         {
             _env = env;
             _logger = logger;
+            TextDirectory = Locations.FileLocation(env);
         }
 
         public void OnGet()
         {
-            string textDirectory = Path.Combine(_env.ContentRootPath, "Data", "Text"); 
-            if (Directory.Exists(textDirectory))
+            if (Directory.Exists(TextDirectory))
             {
-                foreach (string item in new List<string>(Directory.GetFiles(textDirectory)))
+                foreach (string item in new List<string>(Directory.GetFiles(TextDirectory)))
                 {
                     FileList.Add(Path.GetFileName(item));
                 }
             }
+        }
+        
+        public IActionResult OnPostDelete(string FileName)
+        {
+            if (Directory.Exists(TextDirectory))
+            {
+                string FilePath = Path.Combine(TextDirectory, FileName);
+                if (System.IO.File.Exists(FilePath))
+                {
+                    System.IO.File.Delete(FilePath);
+                    return RedirectToPage("List");
+                }
+            }
+            return NotFound();
+        }
+
+        public IActionResult OnPostDeleteAll()
+        {
+            if (Directory.Exists(TextDirectory))
+            {
+                Directory.Delete(TextDirectory, true);
+                Directory.CreateDirectory(TextDirectory);
+            }
+            return RedirectToPage("Index");
         }
     }
 }

@@ -4,25 +4,37 @@
     ViewData["Title"] = "List Page";
 }
 
-<div>
-    <table class="table table-">
-        <thead class="thead-dark">
-            <tr>
-                <th class="display-5" style="width:70%" scope="col">Saved Files</th>
-                <th scope="col" style="width:30%"></th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (string item in Model.FileList)
-        {
-            <tr>
-                <td>@item</td>
-                <td>
-                    @*both the View and Delete functionalities need to be implemented*@
-                    <a asp-class-handler="ViewText" class="btn btn-primary col-auto mx-4">View</a>
-                    <button asp-page-handler="Delete" class="btn btn-danger col-auto mx-4" onclick="return confirm($"Please confirm if you want to delete {item}?")>Delete</button>
-                </td>
-            </tr>
-        }
+@if (Model.FileList.Count > 0)
+{
+    <div>
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th class="display-5" style="width:70%" scope="col">Saved Files</th>
+                    <th scope="col" style="width:30%"></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (string item in Model.FileList)
+            {
+                <tr>
+                    <td>@item</td>
+                    <td>
+                        <form method="post">
+                            <a asp-page="ViewText" asp-route-FileName="@item" class="btn btn-primary text-white col-auto mx-4">View</a>
+                            <button asp-page-handler="Delete" asp-route-FileName="@item" class="btn btn-danger col-auto mx-4" onclick="return confirm('Are you sure you want to delete @item?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        <form method="post">
+            <button asp-page-handler="DeleteAll" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete all files?')">Delete All</button>
+        </form>
     </div>
-</div>
+}
+else
+{
+    <div class="alert alert-info" role="alert">File directory is empty please go to <a asp-page="Index">Home</a> to add files.</div>
+}

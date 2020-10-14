@@ -17,6 +17,8 @@ namespace PasteBin.Pages
 
         private readonly IWebHostEnvironment _env;
 
+        public string TextDirectory { get; set; }
+
         [BindProperty]
         public TextHandler TextHandler { get; set; }
 
@@ -24,33 +26,30 @@ namespace PasteBin.Pages
         {
             _logger = logger;
             _env = env;
+            TextDirectory = Locations.FileLocation(env);
         }
 
-        public void OnGet()
-        {
-
-        }
+        public void OnGet() { }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (TextHandler.Title == "" || TextHandler.Text == "")
+            if (String.IsNullOrWhiteSpace(TextHandler.Title))
             {
                 return RedirectToPage("Index");
             }
-            string directoryPath = Path.Combine(_env.ContentRootPath, "Data", "Text");
 
-            if (!Directory.Exists(directoryPath))
+            if (!Directory.Exists(TextDirectory))
             {
-                Directory.CreateDirectory(directoryPath);
+                Directory.CreateDirectory(TextDirectory);
             }
 
-            string filePath = Path.Combine(directoryPath, $"{TextHandler.Title}.txt");
-            int count = 1;
-            while (System.IO.File.Exists(filePath))
+            string FilePath = Path.Combine(TextDirectory, $"{TextHandler.Title}.txt");
+            int Count = 1;
+            while (System.IO.File.Exists(FilePath))
             {
-                filePath = Path.Combine(directoryPath, $"{TextHandler.Title}-({count++}).txt");
+                FilePath = Path.Combine(TextDirectory, $"{TextHandler.Title}-{Count++}.txt");
             }
-            await System.IO.File.WriteAllTextAsync(filePath,TextHandler.Text);
+            await System.IO.File.WriteAllTextAsync(FilePath,TextHandler.Text);
             return RedirectToPage("List");
         }
     }

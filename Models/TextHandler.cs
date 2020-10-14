@@ -1,13 +1,16 @@
 using System.ComponentModel.DataAnnotations;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace PasteBin.Models
 {
     public class TextHandler
     {
-        [Required]
-        public string Text { get; set; }
+        public readonly IWebHostEnvironment _env;
 
+        public string Text { get; set; } = string.Empty;
+        
         [Required]
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
     }
 }

@@ -6,8 +6,6 @@ namespace PasteBin.Models
 {
     public class TextHandler
     {
-        public readonly IWebHostEnvironment _env;
-
         public string Text { get; set; } = string.Empty;
         
         [Required]

@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using PasteBin.Models;
 using Microsoft.AspNetCore.Hosting;
@@ -26,7 +24,13 @@ namespace PasteBin.Pages
         {
             _logger = logger;
             _env = env;
+           
             TextDirectory = Locations.FileLocation(env);
+
+            if (!Directory.Exists(TextDirectory))
+            {
+                Directory.CreateDirectory(TextDirectory);
+            }
         }
 
         public void OnGet() { }
@@ -36,11 +40,6 @@ namespace PasteBin.Pages
             if (String.IsNullOrWhiteSpace(TextHandler.Title))
             {
                 return RedirectToPage("Index");
-            }
-
-            if (!Directory.Exists(TextDirectory))
-            {
-                Directory.CreateDirectory(TextDirectory);
             }
 
             string FilePath = Path.Combine(TextDirectory, $"{TextHandler.Title}.txt");

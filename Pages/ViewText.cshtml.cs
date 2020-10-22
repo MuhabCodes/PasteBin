@@ -1,13 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using PasteBin.Models;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 
 namespace PasteBin.Pages
 {
@@ -25,7 +22,13 @@ namespace PasteBin.Pages
         {
             _logger=logger;
             _env = env;
+
             TextDirectory = Locations.FileLocation(env);
+
+            if (!Directory.Exists(TextDirectory))
+            {
+                Directory.CreateDirectory(TextDirectory);
+            }
         }
 
         public IActionResult OnGet(string FileName)

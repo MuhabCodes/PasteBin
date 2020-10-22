@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using System.IO;
 using PasteBin.Models;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 
 namespace PasteBin.Pages
 {

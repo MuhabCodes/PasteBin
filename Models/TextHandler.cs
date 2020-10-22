@@ -1,7 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.IO;
-using Microsoft.AspNetCore.Hosting;
-
 namespace PasteBin.Models
 {
     public class TextHandler

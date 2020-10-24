@@ -33,9 +33,9 @@ namespace PasteBin.Pages
                 directoryPath = Locations.FileLocation;
             }
 
-            if (!Directory.Exists(Locations.FileLocation))
+            if (!Directory.Exists(directoryPath))
             {
-                Directory.CreateDirectory(Locations.FileLocation);
+                Directory.CreateDirectory(directoryPath);
             }
         }
 

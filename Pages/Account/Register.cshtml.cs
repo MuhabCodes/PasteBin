@@ -21,6 +21,11 @@ namespace PasteBin.Pages
         public RegisterModel(ILogger<RegisterModel> logger)
         {
             _logger = logger;
+
+            if (!Directory.Exists(Locations.UsersLocation))
+            {
+                Directory.CreateDirectory(Locations.UsersLocation);
+            }
         }
         
         public void OnGet()

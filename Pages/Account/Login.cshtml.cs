@@ -25,6 +25,11 @@ namespace PasteBin.Pages.Account
         public LoginModel(ILogger<LoginModel> logger)
         {
             _logger = logger;
+            
+            if (!Directory.Exists(Locations.UsersLocation))
+            {
+                Directory.CreateDirectory(Locations.UsersLocation);
+            }
         }
 
         public class InputModel

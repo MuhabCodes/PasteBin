@@ -1,15 +1,13 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
 
 <ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
+@if (HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
 {
     <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity.Name!</a>
+        <div  class="nav-link text-dark" asp-area="Identity">Hello @HttpContextAccessor.HttpContext.User.Identity.Name</div>
     </li>
     <li class="nav-item">
-        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post" >
+        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"  method="post">
             <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
         </form>
     </li>

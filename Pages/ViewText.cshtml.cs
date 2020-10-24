@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.IO;
 using PasteBin.Models;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 
 namespace PasteBin.Pages
 {
@@ -11,36 +12,40 @@ namespace PasteBin.Pages
     {
         private readonly ILogger<ViewTextModel> _logger;
         
-        private readonly IWebHostEnvironment _env;
-
-        public string TextDirectory { get; set; }
-
+        private readonly IHttpContextAccessor _httpContext;
+        
+        private string directoryPath;
+        
         public TextHandler ViewedFile { get; set; } = new();
 
-        public ViewTextModel(ILogger<ViewTextModel> logger, IWebHostEnvironment env)
+        public ViewTextModel(ILogger<ViewTextModel> logger, IHttpContextAccessor httpContext)
         {
             _logger=logger;
-            _env = env;
-
-            TextDirectory = Locations.FileLocation(env);
-
-            if (!Directory.Exists(TextDirectory))
+            _httpContext = httpContext;
+            
+            if (_httpContext.HttpContext.User.Identity.IsAuthenticated)
             {
-                Directory.CreateDirectory(TextDirectory);
+                directoryPath = Locations.UserFilesLocation(_httpContext.HttpContext.User.Identity.Name);
+            }
+            else
+            {
+                directoryPath = Locations.FileLocation;
+            }
+
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
             }
         }
 
-        public IActionResult OnGet(string FileName)
+        public IActionResult OnGet(string fileName)
         {
-            ViewedFile.Title = FileName;
-            if (Directory.Exists(TextDirectory))
+            ViewedFile.Title = fileName;
+            string filePath = Path.Combine(directoryPath, fileName);
+            if (System.IO.File.Exists(filePath))
             {
-                string FilePath = Path.Combine(TextDirectory, FileName);
-                if (System.IO.File.Exists(FilePath))
-                {
-                    ViewedFile.Text = System.IO.File.ReadAllText(Path.Combine(TextDirectory, FileName));
-                    return Page();
-                }
+                ViewedFile.Text = System.IO.File.ReadAllText(filePath);
+                return Page();
             }
             return NotFound();
         }

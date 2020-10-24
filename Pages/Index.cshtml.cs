@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using PasteBin.Models;
-using Microsoft.AspNetCore.Hosting;
 
 namespace PasteBin.Pages
 {
@@ -13,42 +16,55 @@ namespace PasteBin.Pages
     {
         private readonly ILogger<IndexModel> _logger;
 
-        private readonly IWebHostEnvironment _env;
-
-        public string TextDirectory { get; set; }
+        private readonly IHttpContextAccessor _httpContext;
+        
+        private string directoryPath;
 
         [BindProperty]
-        public TextHandler TextHandler { get; set; }
+        public TextHandler TextHandler { get; set; } = new();
 
-        public IndexModel(ILogger<IndexModel> logger, IWebHostEnvironment env)
+        public IndexModel(ILogger<IndexModel> logger, IHttpContextAccessor httpContext)
         {
             _logger = logger;
-            _env = env;
-           
-            TextDirectory = Locations.FileLocation(env);
+            _httpContext = httpContext;
 
-            if (!Directory.Exists(TextDirectory))
+
+            if (_httpContext.HttpContext.User.Identity.IsAuthenticated)
             {
-                Directory.CreateDirectory(TextDirectory);
+                directoryPath = Locations.UserFilesLocation(_httpContext.HttpContext.User.Identity.Name);
             }
+            else
+            {
+                directoryPath = Locations.FileLocation;
+            }
+
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            } 
         }
 
-        public void OnGet() { }
+        public void OnGet()
+        {
 
+        }
+        
         public async Task<IActionResult> OnPostAsync()
         {
             if (String.IsNullOrWhiteSpace(TextHandler.Title))
             {
-                return RedirectToPage("Index");
+                ModelState.AddModelError(string.Empty, "Please make sure your text has a title");
+                return Page();
             }
 
-            string FilePath = Path.Combine(TextDirectory, $"{TextHandler.Title}.txt");
-            int Count = 1;
-            while (System.IO.File.Exists(FilePath))
+            string filePath = Path.Combine(directoryPath, $"{TextHandler.Title}.txt");
+
+            int count = 1;
+            while (System.IO.File.Exists(filePath))
             {
-                FilePath = Path.Combine(TextDirectory, $"{TextHandler.Title}-{Count++}.txt");
+                filePath = Path.Combine(directoryPath, $"{TextHandler.Title}-{count++}.txt");
             }
-            await System.IO.File.WriteAllTextAsync(FilePath,TextHandler.Text);
+            await System.IO.File.WriteAllTextAsync(filePath, TextHandler.Text);
             return RedirectToPage("List");
         }
     }

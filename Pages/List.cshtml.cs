@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
@@ -11,58 +12,55 @@ namespace PasteBin.Pages
     public class ListModel : PageModel
     {
         private readonly ILogger<ListModel> _logger;
-
-        private readonly IWebHostEnvironment _env;
         
-        public string TextDirectory { get; set; }
-
-        public List<string> FileList { get; set; } = new List<string>();
+        private readonly IHttpContextAccessor _httpContext;
         
-        public ListModel(ILogger<ListModel> logger, IWebHostEnvironment env)
+        private string directoryPath;
+
+        public List<string> fileList { get; set; } = new List<string>();
+        
+        public ListModel(ILogger<ListModel> logger, IHttpContextAccessor httpContext)
         {
-            _env = env;
             _logger = logger;
+            _httpContext = httpContext;
             
-            TextDirectory = Locations.FileLocation(env);
-
-            if (!Directory.Exists(TextDirectory))
+            if (_httpContext.HttpContext.User.Identity.IsAuthenticated)
             {
-                Directory.CreateDirectory(TextDirectory);
+                directoryPath = Locations.UserFilesLocation(_httpContext.HttpContext.User.Identity.Name);
+            }
+            else
+            {
+                directoryPath = Locations.FileLocation;
+            }
+
+            if (!Directory.Exists(Locations.FileLocation))
+            {
+                Directory.CreateDirectory(Locations.FileLocation);
             }
         }
 
         public void OnGet()
         {
-            if (Directory.Exists(TextDirectory))
+            foreach (string item in new List<string>(Directory.GetFiles(directoryPath)))
             {
-                foreach (string item in new List<string>(Directory.GetFiles(TextDirectory)))
-                {
-                    FileList.Add(Path.GetFileName(item));
-                }
+                fileList.Add(Path.GetFileName(item));
             }
         }
         
         public IActionResult OnPostDelete(string FileName)
         {
-            if (Directory.Exists(TextDirectory))
+            string filePath = Path.Combine(directoryPath, FileName);
+            if (System.IO.File.Exists(filePath))
             {
-                string FilePath = Path.Combine(TextDirectory, FileName);
-                if (System.IO.File.Exists(FilePath))
-                {
-                    System.IO.File.Delete(FilePath);
-                    return RedirectToPage("List");
-                }
+                System.IO.File.Delete(filePath);
+                return RedirectToPage("List");
             }
             return NotFound();
         }
 
         public IActionResult OnPostDeleteAll()
         {
-            if (Directory.Exists(TextDirectory))
-            {
-                Directory.Delete(TextDirectory, true);
-                Directory.CreateDirectory(TextDirectory);
-            }
+            Directory.Delete(directoryPath, true);
             return RedirectToPage("Index");
         }
     }

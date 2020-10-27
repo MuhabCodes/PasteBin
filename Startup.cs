@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using PasteBin.Models;
+using FluentValidation;
 
 namespace PasteBin
 {
@@ -32,6 +34,8 @@ namespace PasteBin
                 });
             services.AddRazorPages();
             services.AddHttpContextAccessor();
+            services.AddTransient<IValidator<ApplicationUser>,RegisterValidator>();
+            services.AddTransient<IValidator<ApplicationUser>,LoginValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

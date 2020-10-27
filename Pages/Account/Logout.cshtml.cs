@@ -3,6 +3,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System;
+using Microsoft.AspNetCore.Authentication;
+using System.Threading;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace PasteBin.Pages.Account
 {
@@ -22,12 +26,11 @@ namespace PasteBin.Pages.Account
         {
         }
         
-        public IActionResult OnPostAsync()
+        public async Task<IActionResult> OnPostAsync()
         {
-            if (_httpContext.HttpContext.User.Identity.IsAuthenticated)
-            {
-                _httpContext.HttpContext.Response.Cookies.Delete("LoginCookie");
-            }
+            _logger.LogInformation("User {Email} has logged out at {UtcNow}",_httpContext.HttpContext.User.Identity.Name,DateTime.UtcNow);
+            await HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToPage("/Index");
         }
     }

@@ -14,5 +14,6 @@ namespace PasteBin.Models
         
         [Required]
         public string Password { get; set; } = string.Empty;
+
     }
 }

@@ -17,7 +17,7 @@
         </thead>
         <tbody>
             <tr>
-                <td>@Model.ViewedFile.Text</td>
+                <td><pre class="prettyprint">@Model.ViewedFile.Text</pre></td>
             </tr>
         </tbody>
     </table>
@@ -26,3 +26,5 @@
         <button asp-page="List" asp-page-handler="Delete" asp-route-FileName="@Model.ViewedFile.Title" class="btn btn-danger col-auto mx-4" onclick="return confirm('Are you sure you want to delete @Model.ViewedFile.Title?')">Delete</button>
     </form>
 }
+
+<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>

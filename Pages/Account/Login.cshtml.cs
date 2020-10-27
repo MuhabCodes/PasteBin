@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication;
 using PasteBin.Models;
 using System.Collections.Generic;
 using System.Security.Claims;
+using FluentValidation;
 
 namespace PasteBin.Pages.Account
 {
@@ -19,12 +20,15 @@ namespace PasteBin.Pages.Account
     {
         private readonly ILogger<LoginModel> _logger;
         
+        private readonly IValidator<ApplicationUser> _validator;
+        
         [BindProperty]
         public InputModel Input { get; set; } = new();
         
-        public LoginModel(ILogger<LoginModel> logger)
+        public LoginModel(ILogger<LoginModel> logger, IValidator<ApplicationUser> validator)
         {
             _logger = logger;
+            _validator = validator;
             
             if (!Directory.Exists(Locations.UsersLocation))
             {
@@ -50,64 +54,49 @@ namespace PasteBin.Pages.Account
             
         }
         
-        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
+        public async Task<IActionResult> OnPostAsync()
         {
+            ApplicationUser user = new();
+            user.Email = Input.Email;
+            user.Password = Input.Password;
 
-            if (ModelState.IsValid)
+            LoginValidator validator = new();
+            var result2 = validator.Validate(user);
+            if (!result2.IsValid)
             {
-                ApplicationUser? user = AuthenticateUser(Input.Email, Input.Password);
-                
-                if (user == null)
+                foreach (var message in result2.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    
-                    return Page();
+                    ModelState.AddModelError(string.Empty, message.ErrorMessage);
                 }
-
-                List<Claim> claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Email),
-                    new Claim("Password", user.Password),
-                };
-                
-                ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                
-                AuthenticationProperties authenticationProperties = new AuthenticationProperties
-                {
-                    AllowRefresh = true,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60),
-                    IsPersistent = true,
-                    IssuedUtc = DateTime.UtcNow,
-                    RedirectUri = "/Index"
-                };
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    authenticationProperties);
-
-                _logger.LogInformation("User {Email} has logged in at {UtcNow}",user.Email, DateTime.UtcNow);
-
-                return RedirectToPage("/Index");
+                _logger.LogInformation("Invalid login attempt for {User} at {UtcNow}",user.Email,DateTime.UtcNow);
+                return Page();
             }
-            return Page();
-        }
 
-        private ApplicationUser? AuthenticateUser(string email, string password)
-        {
-            string jsonFile = Path.Combine(Locations.UsersLocation,$"{email}.json");
-
-            if (!System.IO.File.Exists(jsonFile))   return null;
-            string jsonString = System.IO.File.ReadAllText(jsonFile);
-            ApplicationUser? User = JsonSerializer.Deserialize<ApplicationUser>(jsonString);
-
-            if (User == null || User.Password != Hashing.hash(password,User.Email))
+            List<Claim> claims = new List<Claim>
             {
-                
-                return null;
-            } 
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim("Password", user.Password),
+            };
+            
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            
+            AuthenticationProperties authenticationProperties = new AuthenticationProperties
+            {
+                AllowRefresh = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60),
+                IsPersistent = true,
+                IssuedUtc = DateTime.UtcNow,
+                RedirectUri = "/Index"
+            };
 
-            return User;
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authenticationProperties);
+
+            _logger.LogInformation("User {Email} has logged in at {UtcNow}",user.Email, DateTime.UtcNow);
+
+            return RedirectToPage("/Index");
         }
     }
 }

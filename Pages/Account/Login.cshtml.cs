@@ -68,7 +68,7 @@ namespace PasteBin.Pages.Account
                 {
                     ModelState.AddModelError(string.Empty, message.ErrorMessage);
                 }
-                _logger.LogInformation("Invalid login attempt for {User} at {UtcNow}",user.Email,DateTime.UtcNow);
+                _logger.LogInformation(LogEvents.LoginFailed, "Invalid login attempt for {User} at {UtcNow}", user.Email, DateTime.UtcNow);
                 return Page();
             }
 
@@ -94,7 +94,7 @@ namespace PasteBin.Pages.Account
                 new ClaimsPrincipal(claimsIdentity),
                 authenticationProperties);
 
-            _logger.LogInformation("User {Email} has logged in at {UtcNow}",user.Email, DateTime.UtcNow);
+            _logger.LogInformation(LogEvents.LoginSuccess, "User {Email} has logged in at {UtcNow}", user.Email, DateTime.UtcNow);
 
             return RedirectToPage("/Index");
         }

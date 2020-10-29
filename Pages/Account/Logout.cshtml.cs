@@ -28,7 +28,7 @@ namespace PasteBin.Pages.Account
         
         public async Task<IActionResult> OnPostAsync()
         {
-            _logger.LogInformation("User {Email} has logged out at {UtcNow}",_httpContext.HttpContext.User.Identity.Name,DateTime.UtcNow);
+            _logger.LogInformation(LogEvents.LogoutSuccess, "User {Email} has logged out at {UtcNow}", _httpContext.HttpContext.User.Identity.Name, DateTime.UtcNow);
             await HttpContext.SignOutAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToPage("/Index");

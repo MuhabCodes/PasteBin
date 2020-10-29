@@ -5,6 +5,7 @@ using System.IO;
 using PasteBin.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using System;
 
 namespace PasteBin.Pages
 {
@@ -40,6 +41,7 @@ namespace PasteBin.Pages
 
         public IActionResult OnGet(string fileName)
         {
+            _logger.LogInformation(LogEvents.ViewFileRequest, "User has mae a view file request at {UtcNow}", DateTime.UtcNow);
             ViewedFile.Title = fileName;
             string filePath = Path.Combine(directoryPath, fileName);
             if (System.IO.File.Exists(filePath))
@@ -47,6 +49,7 @@ namespace PasteBin.Pages
                 ViewedFile.Text = System.IO.File.ReadAllText(filePath);
                 return Page();
             }
+            _logger.LogInformation(LogEvents.ViewRequestError, "Error in view file request at {UtcNow}", DateTime.UtcNow);
             return NotFound();
         }
     }

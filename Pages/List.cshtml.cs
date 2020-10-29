@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
@@ -49,17 +50,20 @@ namespace PasteBin.Pages
         
         public IActionResult OnPostDelete(string FileName)
         {
+            _logger.LogInformation(LogEvents.DeleteFileRequest, "User made a delete file request at {UtcNow}", DateTime.UtcNow);
             string filePath = Path.Combine(directoryPath, FileName);
             if (System.IO.File.Exists(filePath))
             {
                 System.IO.File.Delete(filePath);
                 return RedirectToPage("List");
             }
+            _logger.LogInformation(LogEvents.DeleteRequestError, "Error in delete request");
             return NotFound();
         }
 
         public IActionResult OnPostDeleteAll()
         {
+            _logger.LogInformation(LogEvents.DeleteAllRequest, "User has made a delete all files request at {UtcNow}", DateTime.UtcNow);
             Directory.Delete(directoryPath, true);
             return RedirectToPage("Index");
         }

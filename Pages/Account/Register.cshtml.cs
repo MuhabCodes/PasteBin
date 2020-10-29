@@ -47,6 +47,7 @@ namespace PasteBin.Pages
                 {
                     ModelState.AddModelError(string.Empty, message.ErrorMessage);
                 }
+                _logger.LogInformation(LogEvents.RegisterFailed, "Invalid register attempt at {UtcNow}", DateTime.UtcNow); 
                 return Page();
             }
 
@@ -57,9 +58,9 @@ namespace PasteBin.Pages
             string fileName = $"{ApplicationUser.Email}.json";            
             string userPath = Path.Combine(Locations.UsersLocation, fileName);
 
-            System.IO.File.WriteAllText(userPath,jsonString);
+            System.IO.File.WriteAllText(userPath, jsonString);
 
-            _logger.LogInformation("A new account has been created user {Email}",ApplicationUser.Email); 
+            _logger.LogInformation(LogEvents.RegisterSuccess, "A new account has been created user {Email} at {UtcNow}", ApplicationUser.Email, DateTime.UtcNow); 
             return RedirectToPage("/Index");
         }
     }

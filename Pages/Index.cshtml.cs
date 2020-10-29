@@ -54,6 +54,7 @@ namespace PasteBin.Pages
             if (String.IsNullOrWhiteSpace(TextHandler.Title))
             {
                 ModelState.AddModelError(string.Empty, "Please make sure your text has a title");
+                _logger.LogInformation(LogEvents.TextUploadError, "No title added to the text file error");
                 return Page();
             }
 
@@ -65,6 +66,7 @@ namespace PasteBin.Pages
                 filePath = Path.Combine(directoryPath, $"{TextHandler.Title}-{count++}.txt");
             }
             await System.IO.File.WriteAllTextAsync(filePath, TextHandler.Text);
+            _logger.LogInformation(LogEvents.TextUploaded, "Text has been uploaded successfully");
             return RedirectToPage("List");
         }
     }

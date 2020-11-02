@@ -1,16 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PasteBin.Models;
-using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 
 namespace PasteBin
 {
@@ -34,8 +29,7 @@ namespace PasteBin
                 });
             services.AddRazorPages();
             services.AddHttpContextAccessor();
-            services.AddTransient<IValidator<ApplicationUser>,RegisterValidator>();
-            services.AddTransient<IValidator<ApplicationUser>,LoginValidator>();
+            services.AddSingleton<PasswordHasher<ApplicationUser>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

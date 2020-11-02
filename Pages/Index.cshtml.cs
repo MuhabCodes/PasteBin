@@ -23,6 +23,8 @@ namespace PasteBin.Pages
         [BindProperty]
         public TextHandler TextHandler { get; set; } = new();
 
+        public int expireDuration { get; set; } = 0;
+
         public IndexModel(ILogger<IndexModel> logger, IHttpContextAccessor httpContext)
         {
             _logger = logger;
@@ -67,6 +69,22 @@ namespace PasteBin.Pages
             }
             await System.IO.File.WriteAllTextAsync(filePath, TextHandler.Text);
             _logger.LogInformation(LogEvents.TextUploaded, "Text has been uploaded successfully");
+
+            // testing expire duration
+            expireDuration = Convert.ToInt32(Request.Form["expiration"]);
+            if (expireDuration > 0)
+            {
+                System.IO.File.SetCreationTimeUtc(filePath, DateTime.UtcNow.AddDays(expireDuration));
+            }
+            else if (expireDuration == 0)
+            {
+                System.IO.File.SetCreationTimeUtc(filePath,DateTime.UtcNow.AddMinutes(1));
+            }
+            else 
+            {
+                System.IO.File.SetCreationTimeUtc(filePath, DateTime.UtcNow.AddYears(100));
+            }
+
             return RedirectToPage("List");
         }
     }

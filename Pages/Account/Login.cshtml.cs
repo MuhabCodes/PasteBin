@@ -1,6 +1,4 @@
 using System;
-using System.Text;
-using System.Text.Json;
 using System.IO;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
@@ -13,6 +11,8 @@ using PasteBin.Models;
 using System.Collections.Generic;
 using System.Security.Claims;
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
+using System.Text.Json;
 
 namespace PasteBin.Pages.Account
 {
@@ -20,15 +20,15 @@ namespace PasteBin.Pages.Account
     {
         private readonly ILogger<LoginModel> _logger;
         
-        private readonly IValidator<ApplicationUser> _validator;
+        private readonly LoginValidator _validator;
         
         [BindProperty]
         public InputModel Input { get; set; } = new();
         
-        public LoginModel(ILogger<LoginModel> logger, IValidator<ApplicationUser> validator)
+        public LoginModel(ILogger<LoginModel> logger, PasswordHasher<ApplicationUser> hasher)
         {
             _logger = logger;
-            _validator = validator;
+            _validator = new(hasher);
             
             if (!Directory.Exists(Locations.UsersLocation))
             {
@@ -47,6 +47,30 @@ namespace PasteBin.Pages.Account
             public string Password { get; set; } = string.Empty;
         }
 
+        public class LoginValidator: AbstractValidator<ApplicationUser>
+        {
+            public LoginValidator(PasswordHasher<ApplicationUser> hasher)
+            {
+                RuleFor(x => x.Email).EmailAddress().WithMessage("Invalid e-mail Address.");
+                RuleFor(x => x).Custom((val, context) =>
+                {
+                    string jsonPath = Path.Combine(Locations.UsersLocation, $"{val.Email}.json");
+                    if (!System.IO.File.Exists(jsonPath))
+                    {
+                        context.AddFailure("This e-mail is not registered.");
+                        return;
+                    }
+                    string jsonString = System.IO.File.ReadAllText(jsonPath);
+                    ApplicationUser user = JsonSerializer.Deserialize<ApplicationUser>(jsonString);
+
+                    if (hasher.VerifyHashedPassword(user,user.Password,val.Password) != PasswordVerificationResult.Success)
+                    {
+                        context.AddFailure("The e-mail or password that you have entered is incorrect.");
+                    }
+                });
+            }
+        }
+
         public async Task OnGetAsync(string? returnUrl = null)
         {
             await HttpContext.SignOutAsync(
@@ -59,9 +83,7 @@ namespace PasteBin.Pages.Account
             ApplicationUser user = new();
             user.Email = Input.Email;
             user.Password = Input.Password;
-
-            LoginValidator validator = new();
-            var result2 = validator.Validate(user);
+            var result2 = _validator.Validate(user);
             if (!result2.IsValid)
             {
                 foreach (var message in result2.Errors)

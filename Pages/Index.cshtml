@@ -13,6 +13,13 @@
             <input asp-for="TextHandler.Title" type="text" class="w-25 form-control" placeholder="Title">
             <span asp-validation-for="TextHandler.Title" class="text-danger"></span>
             <div class="input-group-append">
+                <select asp-for="expireDuration" class="form-control input-group-addon" name="expiration">
+                    <option class="dropdown-item" value="-1"> Never </option>
+                    <option class="dropdown-item" value="0">1 minute</option>
+                    <option class="dropdown-item" value="1">1 Day</option>
+                    <option class="dropdown-item" value="31">1 Month</option>
+                    <option class="dropdown-item" value="365">1 Year</option>
+                </select>
                 <button type="submit" class="btn btn-primary" asp-page="View">Insert</button>
             </div>
         </div>
@@ -22,3 +29,8 @@
 @section Scripts{
     <partial name="_ValidationScriptsPartial"/>
 }
+
+<style>
+    .select-group input.form-control{ width: 65%}
+    .select-group select.input-group-addon { width: 35%; }
+</style>

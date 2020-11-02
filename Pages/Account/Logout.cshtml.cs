@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
 using Microsoft.AspNetCore.Authentication;
-using System.Threading;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace PasteBin.Pages.Account

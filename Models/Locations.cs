@@ -1,5 +1,4 @@
 using System.IO;
-using PasteBin.Models;
 
 namespace PasteBin.Models
 {

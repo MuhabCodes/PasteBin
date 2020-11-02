@@ -1,34 +1,51 @@
 using System;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity;
 using PasteBin.Models;
 using FluentValidation;
 
 
-namespace PasteBin.Pages
+namespace PasteBin.Pages.Account
 {
     public class RegisterModel : PageModel
     {
         private readonly ILogger<RegisterModel> _logger;
 
-        private readonly IValidator<ApplicationUser> _validator;
+        private readonly RegisterValidator _validator = new();
+
+        private readonly PasswordHasher<ApplicationUser> _hasher;
 
         [BindProperty]
         public ApplicationUser ApplicationUser { get; set; } = new();
 
-        public RegisterModel(ILogger<RegisterModel> logger, IValidator<ApplicationUser> validator)
+        public RegisterModel(ILogger<RegisterModel> logger, PasswordHasher<ApplicationUser> hasher)
         {
             _logger = logger;
-            _validator = validator;
+            _hasher = hasher; 
 
             if (!Directory.Exists(Locations.UsersLocation))
             {
                 Directory.CreateDirectory(Locations.UsersLocation);
+            }
+        }
+
+        public class RegisterValidator: AbstractValidator<ApplicationUser>
+        {
+            public RegisterValidator()
+            {
+                RuleFor(x => x.Email).EmailAddress().WithMessage("Invalid e-mail Address.");
+                RuleFor(x => x.Password).MinimumLength(8).WithMessage("Password must be atleast 8 characters long.");
+                RuleFor(x => x.Email).Custom((val, context) =>
+                {
+                    if (System.IO.File.Exists(Path.Combine(Locations.UsersLocation, $"{val}.json")))
+                    {
+                        context.AddFailure("This e-mail is already in use.");
+                    }
+                });
             }
         }
         
@@ -38,8 +55,7 @@ namespace PasteBin.Pages
 
         public IActionResult OnPost()
         {
-            RegisterValidator validator = new();
-            var result = validator.Validate(ApplicationUser);
+            var result = _validator.Validate(ApplicationUser);
 
             if (!result.IsValid)
             {
@@ -50,8 +66,8 @@ namespace PasteBin.Pages
                 _logger.LogInformation(LogEvents.RegisterFailed, "Invalid register attempt at {UtcNow}", DateTime.UtcNow); 
                 return Page();
             }
-
-            ApplicationUser.Password = Hashing.hash(ApplicationUser.Password, ApplicationUser.Email);
+            ApplicationUser.Password = _hasher.HashPassword(ApplicationUser, ApplicationUser.Password);
+            // ApplicationUser.Password = Hashing.hash(ApplicationUser.Password,ApplicationUser.Email);
 
             string jsonString = JsonSerializer.Serialize(ApplicationUser);
             

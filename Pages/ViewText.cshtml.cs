@@ -41,7 +41,7 @@ namespace PasteBin.Pages
 
         public IActionResult OnGet(string fileName)
         {
-            _logger.LogInformation(LogEvents.ViewFileRequest, "User has mae a view file request at {UtcNow}", DateTime.UtcNow);
+            _logger.LogInformation(LogEvents.ViewFileRequest, "User has made a view file request at {UtcNow}", DateTime.UtcNow);
             ViewedFile.Title = fileName;
             string filePath = Path.Combine(directoryPath, fileName);
             if (System.IO.File.Exists(filePath))

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -44,6 +43,11 @@ namespace PasteBin.Pages
         {
             foreach (string item in new List<string>(Directory.GetFiles(directoryPath)))
             {
+                if (DateTime.UtcNow >= System.IO.File.GetCreationTimeUtc(item))
+                {
+                    System.IO.File.Delete(item);
+                    continue;
+                }
                 fileList.Add(Path.GetFileName(item));
             }
         }

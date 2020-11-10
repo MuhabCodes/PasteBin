@@ -8,6 +8,7 @@ namespace PasteBin.Models
         
         public static string UsersLocation = Path.Combine("Data","Users");
 
+        public static string JsonLocation = Path.Combine("Data", "Json");
         public static string UserFilesLocation(string username) =>
             Path.Combine(FileLocation,username);
     }

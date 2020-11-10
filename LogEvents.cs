@@ -4,9 +4,11 @@ namespace PasteBin
     {
         // index 
         public const int TextUploaded = 1000;
+        public const int FileUpload = 1001;
 
         // index errors
         public const int TextUploadError = 1100;
+        public const int FileUploadError = 1101;
 
         //  list
         public const int ViewFileRequest = 2000;

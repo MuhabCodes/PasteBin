@@ -6,14 +6,19 @@
 
 <div>
     <h1 class="display-4 text-center">PasteBin</h1>
-    <form method="post">
-        <textarea asp-for="TextHandler.Text" type="text" class="form-control rounded-0" rows=10></textarea><br>
-        <span asp-validation-for="TextHandler.Text" class="text-danger"></span>
+    <form>
+        <input type="radio" id="insert" name="add" value="0" checked>
+        <label for="insert">Insert</label>
+        <input type="radio" id="upload" name="add" value="1">
+        <label for="upload">Upload</label>
+    </form>
+    <form id="insert" method="post">
+        <textarea asp-for="Input.Text" type="text" class="form-control rounded-0" rows=10></textarea><br>
+        <span asp-validation-for="Input.Text" class="text-danger"></span>
         <div class="input-group mb-3">
-            <input asp-for="TextHandler.Title" type="text" class="w-25 form-control" placeholder="Title">
-            <span asp-validation-for="TextHandler.Title" class="text-danger"></span>
+            <input asp-for="Input.Title" type="text" class="w-25 form-control" placeholder="Title">
             <div class="input-group-append">
-                <select asp-for="expireDuration" class="form-control input-group-addon" name="expiration">
+                <select asp-for="Input.Duration" class="form-control input-group-addon">
                     <option class="dropdown-item" value="-1"> Never </option>
                     <option class="dropdown-item" value="0">1 minute</option>
                     <option class="dropdown-item" value="1">1 Day</option>
@@ -22,12 +27,41 @@
                 </select>
                 <button type="submit" class="btn btn-primary" asp-page="View">Insert</button>
             </div>
+            <span asp-validation-for="Input.Title" class="text-danger"></span>
+        </div>
+        <div class="input-group mb-3">
+            <input id="Password_Box" asp-for="Input.Password" type="password" class="form-control" placeholder="Password" disabled>
+            <div class="input-group-append">
+                <span class="input-group-text">Encrypt?</span>
+            </div>
+            <div class="input-group-append">
+                <div class="input-group-text form-control">
+                    <input id="Encrypt_Box" type="checkbox" asp-for="Input.IsEncrypted" onchange="disablePasswordForm()">
+                </div>
+            </div>
+            <span asp-validation-for="Input.Password" class="text-danger"></span>
+        </div>
+    </form>
+    <form id="upload" enctype="multipart/form-data" method="post">
+        <div class="input-group">
+            <div class="custom-file">
+                <input asp-for="Input.File" class="custom-file-input" type="file">
+                <label asp-for="Input.File" class="custom-file-label">Upload File</label>
+            </div>
+            <div class="input-group-append">
+                <input asp-page-handler="Upload" class="btn btn-primary" type="submit" value="Upload">
+            </div>
         </div>
     </form>
 </div>
 
 @section Scripts{
     <partial name="_ValidationScriptsPartial"/>
+    <script>
+        function disablePasswordForm(){
+            document.querySelector("#Password_Box").disabled = !document.querySelector("#Encrypt_Box").checked;
+        }
+    </script>
 }
 
 <style>

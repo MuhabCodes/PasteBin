@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using PasteBin.Models;
+using System.Text.Json;
 
 namespace PasteBin.Pages
 {
@@ -14,8 +15,6 @@ namespace PasteBin.Pages
         private readonly ILogger<ListModel> _logger;
         
         private readonly IHttpContextAccessor _httpContext;
-        
-        private string directoryPath;
 
         public List<string> fileList { get; set; } = new List<string>();
         
@@ -24,26 +23,23 @@ namespace PasteBin.Pages
             _logger = logger;
             _httpContext = httpContext;
             
-            if (_httpContext.HttpContext.User.Identity.IsAuthenticated)
+            if (!Directory.Exists(Locations.FileLocation))
             {
-                directoryPath = Locations.UserFilesLocation(_httpContext.HttpContext.User.Identity.Name);
-            }
-            else
-            {
-                directoryPath = Locations.FileLocation;
+                Directory.CreateDirectory(Locations.FileLocation);
             }
 
-            if (!Directory.Exists(directoryPath))
+            if (!Directory.Exists(Locations.JsonLocation))
             {
-                Directory.CreateDirectory(directoryPath);
-            }
+                Directory.CreateDirectory(Locations.JsonLocation);
+            } 
         }
 
         public void OnGet()
         {
-            foreach (string item in new List<string>(Directory.GetFiles(directoryPath)))
+            foreach (string item in new List<string>(Directory.GetFiles(Locations.FileLocation)))
             {
-                if (DateTime.UtcNow >= System.IO.File.GetCreationTimeUtc(item))
+                FileHandler fileHandler = JsonSerializer.Deserialize<FileHandler>(System.IO.File.ReadAllText(item));
+                if (DateTime.UtcNow >= fileHandler.ExpireTime)
                 {
                     System.IO.File.Delete(item);
                     continue;
@@ -55,7 +51,7 @@ namespace PasteBin.Pages
         public IActionResult OnPostDelete(string FileName)
         {
             _logger.LogInformation(LogEvents.DeleteFileRequest, "User made a delete file request at {UtcNow}", DateTime.UtcNow);
-            string filePath = Path.Combine(directoryPath, FileName);
+            string filePath = Path.Combine(Locations.UsersLocation, FileName);
             if (System.IO.File.Exists(filePath))
             {
                 System.IO.File.Delete(filePath);
@@ -68,7 +64,7 @@ namespace PasteBin.Pages
         public IActionResult OnPostDeleteAll()
         {
             _logger.LogInformation(LogEvents.DeleteAllRequest, "User has made a delete all files request at {UtcNow}", DateTime.UtcNow);
-            Directory.Delete(directoryPath, true);
+            Directory.Delete(Locations.UsersLocation, true);
             return RedirectToPage("Index");
         }
     }

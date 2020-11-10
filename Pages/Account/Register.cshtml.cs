@@ -67,7 +67,6 @@ namespace PasteBin.Pages.Account
                 return Page();
             }
             ApplicationUser.Password = _hasher.HashPassword(ApplicationUser, ApplicationUser.Password);
-            // ApplicationUser.Password = Hashing.hash(ApplicationUser.Password,ApplicationUser.Email);
 
             string jsonString = JsonSerializer.Serialize(ApplicationUser);
             

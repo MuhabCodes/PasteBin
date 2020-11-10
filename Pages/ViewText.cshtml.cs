@@ -6,6 +6,7 @@ using PasteBin.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Text;
 
 namespace PasteBin.Pages
 {

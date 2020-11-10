@@ -75,10 +75,10 @@ namespace PasteBin.Pages
                 return Page();
             }
 
-            using(FileStream fileStream = new FileStream(Locations.FileLocation, FileMode.Create, FileAccess.Write))
-            {
-                await Input.File.CopyToAsync(fileStream);
-            }
+            // FileHandler = new(Input.File.FileName, DateTime.UtcNow.Add(TimeSpan.FromDays(365)), false);
+            FileHandler = new();
+            FileHandler.UploadFile(Input.File);
+
             _logger.LogInformation(LogEvents.FileUpload, "File uploaded successfully");
             return RedirectToPage("List");
         }
@@ -114,7 +114,10 @@ namespace PasteBin.Pages
                 expire = Input.ExpireTime.Add(TimeSpan.FromDays(3650));
             }
 
-            FileHandler = new(Input.Title, Input.ExpireTime.Add(TimeSpan.FromDays(Input.Duration)), Input.IsEncrypted);
+            FileHandler = new();
+            FileHandler.FileName = Input.Title;
+            FileHandler.ExpireTime = Input.ExpireTime.Add(TimeSpan.FromDays(Input.Duration));
+            FileHandler.IsEncrypted = Input.IsEncrypted;
 
             if (Input.IsEncrypted)
             {

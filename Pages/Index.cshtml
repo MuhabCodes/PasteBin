@@ -7,12 +7,23 @@
 <div>
     <h1 class="display-4 text-center">PasteBin</h1>
     <form>
-        <input type="radio" id="insert" name="add" value="0" checked>
+        <input type="radio" id="insert" name="add" value="0" checked onchange="insertForm()">
         <label for="insert">Insert</label>
-        <input type="radio" id="upload" name="add" value="1">
+        <input type="radio" id="upload" name="add" value="1" onchange="uploadForm()">
         <label for="upload">Upload</label>
     </form>
-    <form id="insert" method="post">
+    <form id="uploadForm" enctype="multipart/form-data" method="post" style="visibility:hidden">
+        <div class="input-group">
+            <div class="custom-file">
+                <input asp-for="Input.File" class="custom-file-input" type="file">
+                <label asp-for="Input.File" class="custom-file-label">Upload File</label>
+            </div>
+            <div class="input-group-append">
+                <input asp-page-handler="Upload" class="btn btn-primary" type="submit" value="Upload">
+            </div>
+        </div>
+    </form>
+    <form id="insertForm" method="post">
         <textarea asp-for="Input.Text" type="text" class="form-control rounded-0" rows=10></textarea><br>
         <span asp-validation-for="Input.Text" class="text-danger"></span>
         <div class="input-group mb-3">
@@ -42,17 +53,6 @@
             <span asp-validation-for="Input.Password" class="text-danger"></span>
         </div>
     </form>
-    <form id="upload" enctype="multipart/form-data" method="post">
-        <div class="input-group">
-            <div class="custom-file">
-                <input asp-for="Input.File" class="custom-file-input" type="file">
-                <label asp-for="Input.File" class="custom-file-label">Upload File</label>
-            </div>
-            <div class="input-group-append">
-                <input asp-page-handler="Upload" class="btn btn-primary" type="submit" value="Upload">
-            </div>
-        </div>
-    </form>
 </div>
 
 @section Scripts{
@@ -60,6 +60,18 @@
     <script>
         function disablePasswordForm(){
             document.querySelector("#Password_Box").disabled = !document.querySelector("#Encrypt_Box").checked;
+        }
+        function uploadForm(){
+            if (document.querySelector("#upload").checked){
+                document.querySelector("#insertForm").style.visibility = "hidden";
+                document.querySelector("#uploadForm").style.visibility = "visible";
+            }
+        }
+        function insertForm(){
+            if (document.querySelector("#insert").checked){
+                document.querySelector("#uploadForm").style.visibility = "hidden";
+                document.querySelector("#insertForm").style.visibility = "visible";
+            }
         }
     </script>
 }

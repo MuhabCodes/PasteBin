@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text;
 using System.Security.Cryptography;
 using System.Runtime.InteropServices;
+using Microsoft.AspNetCore.Http;
 
 namespace PasteBin.Models
 {
@@ -21,24 +22,32 @@ namespace PasteBin.Models
         [JsonPropertyName("isEncrypted")]
         public bool IsEncrypted { get; set; }
 
-        [JsonPropertyName("fileUrl")]
-        public string FileUrl { get; set; } = string.Empty;
-
-        public FileHandler(string name, DateTime expire, bool encrypt) 
-        {
-            FileName = name;
-            ExpireTime = expire;
-            IsEncrypted = encrypt;
-        }
-
         public async void WriteFile(string filePath, string text, DateTime expire, bool encrypt)
         {
             await File.WriteAllTextAsync(filePath, text);
 
             string fileName = Path.GetFileName(filePath);
-            FileHandler fileHandler = new(fileName, expire, encrypt);
+            FileHandler fileHandler = new();
+            fileHandler.FileName = filePath;
+            fileHandler.ExpireTime = expire;
+            fileHandler.IsEncrypted = false;
             string jsonString = JsonSerializer.Serialize(fileHandler);
             string jsonFile = $"{fileName}.json";
+
+            await File.WriteAllTextAsync(Path.Combine(Locations.JsonLocation, jsonFile), jsonString);
+        }
+
+        public async void UploadFile(IFormFile file)
+        {
+            using var fileStream = new FileStream(Path.Combine(Locations.FileLocation, file.FileName), FileMode.Create, FileAccess.Write);
+            await file.CopyToAsync(fileStream);
+            
+            FileHandler fileHandler = new();
+            fileHandler.FileName = file.FileName;
+            fileHandler.ExpireTime = DateTime.UtcNow.Add(TimeSpan.FromDays(365));
+            fileHandler.IsEncrypted = false;
+            string jsonString = JsonSerializer.Serialize(fileHandler);
+            string jsonFile = $"{file.FileName}.json";
 
             await File.WriteAllTextAsync(Path.Combine(Locations.JsonLocation, jsonFile), jsonString);
         }
@@ -49,7 +58,11 @@ namespace PasteBin.Models
             string fileName = Path.GetFileName(filePath);
             
 
-            FileHandler fileHandler = new(fileName, expire, encrypt);
+            FileHandler fileHandler = new();
+            fileHandler.FileName = filePath;
+            fileHandler.ExpireTime = expire;
+            fileHandler.IsEncrypted = true;
+
             string jsonString = JsonSerializer.Serialize(fileHandler);
             string jsonFile = $"{fileName}.json";
 

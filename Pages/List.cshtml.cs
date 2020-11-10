@@ -38,7 +38,9 @@ namespace PasteBin.Pages
         {
             foreach (string item in new List<string>(Directory.GetFiles(Locations.FileLocation)))
             {
-                FileHandler fileHandler = JsonSerializer.Deserialize<FileHandler>(System.IO.File.ReadAllText(item));
+                string jsonFile = $"{Path.GetFileName(item)}.json";
+                string json = System.IO.File.ReadAllText(Path.Combine(Locations.JsonLocation, jsonFile));
+                FileHandler fileHandler = JsonSerializer.Deserialize<FileHandler>(json);
                 if (DateTime.UtcNow >= fileHandler.ExpireTime)
                 {
                     System.IO.File.Delete(item);

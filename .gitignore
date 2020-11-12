@@ -37,10 +37,10 @@ msbuild.wrn
 .vs/
 
 # Text Folder
-Text/
+files/
 
 # Users Folder
-Users/
+users/
 
 # Json Folder
-Json/
+json/

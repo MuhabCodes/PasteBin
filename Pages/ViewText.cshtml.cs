@@ -16,27 +16,24 @@ namespace PasteBin.Pages
         
         private readonly IHttpContextAccessor _httpContext;
         
-        private string directoryPath;
-        
         public TextHandler ViewedFile { get; set; } = new();
+
+        public string FilePath;
 
         public ViewTextModel(ILogger<ViewTextModel> logger, IHttpContextAccessor httpContext)
         {
             _logger=logger;
             _httpContext = httpContext;
             
-            if (_httpContext.HttpContext.User.Identity.IsAuthenticated)
+
+            if (!Directory.Exists(Locations.FileLocation))
             {
-                directoryPath = Locations.UserFilesLocation(_httpContext.HttpContext.User.Identity.Name);
-            }
-            else
-            {
-                directoryPath = Locations.FileLocation;
+                Directory.CreateDirectory(Locations.FileLocation);
             }
 
-            if (!Directory.Exists(directoryPath))
+            if (!Directory.Exists(Locations.JsonLocation))
             {
-                Directory.CreateDirectory(directoryPath);
+                Directory.CreateDirectory(Locations.JsonLocation);
             }
         }
 
@@ -44,10 +41,13 @@ namespace PasteBin.Pages
         {
             _logger.LogInformation(LogEvents.ViewFileRequest, "User has made a view file request at {UtcNow}", DateTime.UtcNow);
             ViewedFile.Title = fileName;
-            string filePath = Path.Combine(directoryPath, fileName);
-            if (System.IO.File.Exists(filePath))
+            FilePath = Path.Combine(Locations.FileLocation, fileName);
+            if (System.IO.File.Exists(FilePath))
             {
-                ViewedFile.Text = System.IO.File.ReadAllText(filePath);
+                if (!FileHandler.IfImage(fileName))
+                {
+                    ViewedFile.Text = System.IO.File.ReadAllText(FilePath);
+                }
                 return Page();
             }
             _logger.LogInformation(LogEvents.ViewRequestError, "Error in view file request at {UtcNow}", DateTime.UtcNow);

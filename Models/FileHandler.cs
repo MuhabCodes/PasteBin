@@ -22,7 +22,21 @@ namespace PasteBin.Models
         [JsonPropertyName("isEncrypted")]
         public bool IsEncrypted { get; set; }
 
-        public async void WriteFile(string filePath, string text, DateTime expire, bool encrypt)
+        [JsonPropertyName("isImage")]
+        public bool IsImage { get; set; }
+
+        public static bool IfImage(string filePath)
+        {
+            string fileName = Path.GetFileName(filePath);
+            string fileExtension = Path.GetExtension(fileName).ToLowerInvariant();
+
+            if (fileExtension == ".jpg" || fileExtension == ".webp" || fileExtension == ".jpeg" )
+            {
+                return true;
+            }
+            return false;
+        }
+        public async void WriteFile(string filePath, string text, DateTime expire)
         {
             await File.WriteAllTextAsync(filePath, text);
 
@@ -31,6 +45,7 @@ namespace PasteBin.Models
             fileHandler.FileName = filePath;
             fileHandler.ExpireTime = expire;
             fileHandler.IsEncrypted = false;
+            fileHandler.IsImage = false;
             string jsonString = JsonSerializer.Serialize(fileHandler);
             string jsonFile = $"{fileName}.json";
 
@@ -46,13 +61,15 @@ namespace PasteBin.Models
             fileHandler.FileName = file.FileName;
             fileHandler.ExpireTime = DateTime.UtcNow.Add(TimeSpan.FromDays(365));
             fileHandler.IsEncrypted = false;
+            fileHandler.IsImage = IfImage(file.FileName);
+
             string jsonString = JsonSerializer.Serialize(fileHandler);
             string jsonFile = $"{file.FileName}.json";
 
             await File.WriteAllTextAsync(Path.Combine(Locations.JsonLocation, jsonFile), jsonString);
         }
 
-        public async void WriteFileEncrypted(string filePath, string text, DateTime expire, bool encrypt, string password)
+        public async void WriteFileEncrypted(string filePath, string text, DateTime expire, string password)
         {
             byte[] data = Encoding.ASCII.GetBytes(text);
             string fileName = Path.GetFileName(filePath);
@@ -62,7 +79,7 @@ namespace PasteBin.Models
             fileHandler.FileName = filePath;
             fileHandler.ExpireTime = expire;
             fileHandler.IsEncrypted = true;
-
+            fileHandler.IsImage = false;
             string jsonString = JsonSerializer.Serialize(fileHandler);
             string jsonFile = $"{fileName}.json";
 

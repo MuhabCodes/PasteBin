@@ -50,12 +50,17 @@ namespace PasteBin.Pages
             }
         }
         
-        public IActionResult OnPostDelete(string FileName)
+        public IActionResult OnPostDelete(string fileName)
         {
             _logger.LogInformation(LogEvents.DeleteFileRequest, "User made a delete file request at {UtcNow}", DateTime.UtcNow);
-            string filePath = Path.Combine(Locations.UsersLocation, FileName);
+            string filePath = Path.Combine(Locations.FileLocation, fileName);
             if (System.IO.File.Exists(filePath))
             {
+                string jsonPath = Path.Combine(Locations.JsonLocation, $"{fileName}.json");
+                if (System.IO.File.Exists(jsonPath))
+                {
+                    System.IO.File.Delete(jsonPath);
+                }
                 System.IO.File.Delete(filePath);
                 return RedirectToPage("List");
             }
@@ -66,7 +71,8 @@ namespace PasteBin.Pages
         public IActionResult OnPostDeleteAll()
         {
             _logger.LogInformation(LogEvents.DeleteAllRequest, "User has made a delete all files request at {UtcNow}", DateTime.UtcNow);
-            Directory.Delete(Locations.UsersLocation, true);
+            Directory.Delete(Locations.FileLocation, true);
+            Directory.Delete(Locations.JsonLocation, true);
             return RedirectToPage("Index");
         }
     }

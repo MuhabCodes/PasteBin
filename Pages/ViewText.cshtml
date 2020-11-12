@@ -6,6 +6,7 @@
         ViewData["Title"] = $"{@Model.ViewedFile.Title}";
     }
 }
+@using PasteBin.Models
 
 @if (Model.ViewedFile != null)
 {
@@ -17,7 +18,16 @@
         </thead>
         <tbody>
             <tr>
-                <td><pre class="prettyprint">@Model.ViewedFile.Text</pre></td>
+                <td>
+                @if (@Models.FileHandler.IfImage(@Model.ViewedFile.Title))
+                {
+                    <img src="files/@Model.ViewedFile.Title" alt="Image">
+                }
+                else 
+                {
+                    <pre class="prettyprint">@Model.ViewedFile.Text</pre>
+                }
+                </td>
             </tr>
         </tbody>
     </table>

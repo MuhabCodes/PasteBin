@@ -121,11 +121,11 @@ namespace PasteBin.Pages
 
             if (Input.IsEncrypted)
             {
-                FileHandler.WriteFileEncrypted(filePath, Input.Text, expire, true, Input.Password);
+                FileHandler.WriteFileEncrypted(filePath, Input.Text, expire, Input.Password);
             }
             else 
             {
-                FileHandler.WriteFile(filePath, Input.Text, expire, false);
+                FileHandler.WriteFile(filePath, Input.Text, expire);
             }
 
             _logger.LogInformation(LogEvents.TextUploaded, "Text has been uploaded successfully");

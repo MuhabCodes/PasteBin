@@ -21,8 +21,8 @@
                     <td>@item</td>
                     <td>
                         <form method="post">
-                            <a asp-page="ViewText" asp-route-FileName="@item" class="btn btn-primary text-white col-auto mx-4">View</a>
-                            <button asp-page-handler="Delete" asp-route-FileName="@item" class="btn btn-danger col-auto mx-4" onclick="return confirm('Are you sure you want to delete @item?')">Delete</button>
+                            <a asp-page="ViewText" asp-route-fileName="@item" class="btn btn-primary text-white col-auto mx-4">View</a>
+                            <button asp-page-handler="Delete" asp-route-fileName="@item" class="btn btn-danger col-auto mx-4" onclick="return confirm('Are you sure you want to delete @item?')">Delete</button>
                         </form>
                     </td>
                 </tr>
